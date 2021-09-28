@@ -53,7 +53,7 @@
             $zafra = $row_zafra["zafra"];
         }
 
-        $ID_COMP;
+        $ID_COMP = "";
         $radiacion = $rowData[5] * 0.00089681;
         $tem = $rowData[2];
         $temMin = $rowData[3];
@@ -82,29 +82,28 @@
 
         $sql_ro = "SELECT R_0 FROM master_ro WHERE Mes='$mon'";
         $result_master_ro = $conn->query($sql_ro);
-        
+
         foreach($result_master_ro as $row_master_ro) {
             $R0 = $row_master_ro["R_0"];
         }
 
         $sql_ra = "SELECT Rso FROM master_ra WHERE ANO='$year' AND MES='$month' AND DIA='$dateStr'";
         $result_master_ra = $conn->query($sql_ra);
-        
+
         foreach($result_master_ra as $row_master_ra) {
             $Rso = $row_master_ra["Rso"];
         }
 
         $sql_batches = "SELECT * FROM master_batches WHERE NOMBRE='$Estacion'";
         $result_master_batches = $conn->query($sql_batches);
-        
+
         foreach($result_master_batches as $row_master_batches) {
-            $ID_COMP = $row_master_batches["ID_COMP"];
+            $ID_COMP .= (($ID_COMP!=="") ? (','. $row_master_batches["ID_COMP"]) : $row_master_batches["ID_COMP"]);
             $Cuadrante = $row_master_batches["Cuadrante"];
             $Estrato = $row_master_batches["Estrato"];
             $Altitude_Use = $row_master_batches["ALTITUD_Utilizar"];
             $Region = $row_master_batches["Region"];
             $Aplica = $row_master_batches["Aplica"];
-            break;
         }
 
         if ($radiacion > 30) $radiacion = 30;
@@ -140,9 +139,9 @@
         $Rn = $Rns - $Rnl;
         $Eto_PENMAN = ($pendiente_curva/(($pendiente_curva+($Kpa*(1+(0.34*($velocidad_viento*0.20794)))))))*(0.408*$Rn)+(($Kpa/(($pendiente_curva+($Kpa*(1+(0.34*($velocidad_viento*0.20794)))))))*(900/($tem+273))*($velocidad_viento*0.20794)*$deficit_presion);
 
-        $sql_clima = "SELECT Fecha FROM reporte_clima WHERE Fecha='$rowData[1]' AND Estacion='$rowData[0]'";
-        $clima = $conn->query($sql_clima);
-        if ($clima->num_rows==0) {
+        // $sql_clima = "SELECT Fecha FROM reporte_clima WHERE Fecha='$rowData[1]' AND Estacion='$rowData[0]'";
+        // $clima = $conn->query($sql_clima);
+        // if ($clima->num_rows==0) {
             $clima_insert_query = "INSERT INTO reporte_clima (
                 Estacion, Fecha, temperatura, temperatura_min, temperatura_max, Radiacion, ID_COMP,
                 Ano, Mes, Dia, R0, Zafra, Amplitud_Termica, radiacion_promedio, humedad_relativa,
@@ -160,7 +159,7 @@
                 '$pendiente_curva', '$presion_de', '$presion_real_de', '$deficit_presion', '$Eto_Hargreaves', '$velocidad_estandar',
                 '$Cuadrante', '$Estrato', '$Altitude_Use', '$Region', '$Codigo_buscar', '$Kpa', '$Rnl', '$Rn', '$Eto_PENMAN', '$Aplica')";
             $confirm_clima = $conn->query($clima_insert_query);
-        }
+        // }
     }
     echo json_encode(array("success"=>true));
 ?>

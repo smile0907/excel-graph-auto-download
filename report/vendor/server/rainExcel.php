@@ -30,6 +30,15 @@
         $USUARIO = $rowData[0];
         $RECIBIDO = $rowData[1];
         $FECHA = $rowData[2];
+        $FechaType = gettype($FECHA);
+        if ($FechaType==='string') {
+            $FECHA = date_create_from_format('d/m/Y', $FECHA);
+            $FECHA = $Fecha->format('d/m/Y');
+        } else {
+            $FECHA = date('d/m/Y', PHPExcel_Shared_Date::ExcelToPHP($FECHA));
+        }
+        $FechaData = date_create_from_format('d/m/Y', $FECHA);
+        $FECHA = $FechaData->format('d/m/Y');
         $ANO = $rowData[3];
         $MES = $rowData[4];
         $REGION = $rowData[5];

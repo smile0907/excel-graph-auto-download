@@ -28,31 +28,31 @@
                                         FALSE);
         $rowData = $rowData[0];
 
-        $Estacion = $rowData[1];
-        $Fecha = $rowData[2];
-        $temperatura = $rowData[3];
-        $temperatura_minima = $rowData[4];
-        $temperatura_maxima = $rowData[5];
-        $radiacion = $rowData[6];
-        $radiacion_promedio = $rowData[7];
-        $humedad_relativa = $rowData[8];
-        $humedad_relativa_minima = $rowData[9];
-        $humedad_relativa_maxima = $rowData[10];
-        $precipitacion = $rowData[11];
-        $velocidad_viento = $rowData[12];
-        $velocidad_viento_minima = $rowData[13];
-        $velocidad_viento_maxima = $rowData[14];
-        $mojadura = $rowData[15];
-        $presion_atmosferica = $rowData[16];
-        $presion_atmosferica_minima = $rowData[17];
-        $presion_atmosferica_maxima = $rowData[18];
-        $direccion_viento = $rowData[19];
+        $Estacion = $rowData[0];
+        $Fecha = $rowData[1];
+        $temperatura = $rowData[2];
+        $temperatura_minima = $rowData[3];
+        $temperatura_maxima = $rowData[4];
+        $radiacion = $rowData[5];
+        $radiacion_promedio = $rowData[6];
+        $humedad_relativa = $rowData[7];
+        $humedad_relativa_minima = $rowData[8];
+        $humedad_relativa_maxima = $rowData[9];
+        $precipitacion = $rowData[10];
+        $velocidad_viento = $rowData[11];
+        $velocidad_viento_minima = $rowData[12];
+        $velocidad_viento_maxima = $rowData[13];
+        $mojadura = $rowData[14];
+        $presion_atmosferica = $rowData[15];
+        $presion_atmosferica_minima = $rowData[16];
+        $presion_atmosferica_maxima = $rowData[17];
+        $direccion_viento = $rowData[18];
         $FechaType = gettype($Fecha);
         if ($FechaType==='string') {
             $Fecha = date_create_from_format('d/m/Y', $Fecha);
             $Fecha = $Fecha->format('d/m/Y');
         } else {
-            $Fecha = date('d/m/Y', PHPExcel_Shared_Date::ExcelToPHP($Fecha));
+            $Fecha = date('m/d/Y', PHPExcel_Shared_Date::ExcelToPHP($Fecha));
         }
 
         $sql = "SELECT Estacion, Fecha FROM excel WHERE Estacion='$Estacion' AND Fecha='$Fecha'";
@@ -71,17 +71,17 @@
             $confirm = $conn->query($insert_query);
         }
 
-        $FechaData = date_create_from_format('d/m/Y', $Fecha);
+        $FechaData = date_create_from_format('m/d/Y', $Fecha);
         $yearStr = $FechaData->format('Y');
         $monthStr = $FechaData->format('m');
         $dateStr = $FechaData->format('d');
-        
+
         $year = (int)$yearStr;
         $month = (int)$monthStr;
         $date = (int)$dateStr;
         $dateStr = '0' . $date;
         $mon = $monthArray[$month];
-
+        
         $Fecha = $FechaData->format('Y-m-d');
 
         $sql_zafra = "SELECT zafra FROM zafra_masters WHERE ano='$year' AND mes='$month'";
