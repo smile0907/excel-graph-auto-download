@@ -13,7 +13,7 @@
     foreach($result as $row) {
         array_push($master_ro, $row);
     }
-    
+
     $sql = "SELECT * FROM master_ra ORDER BY codigo_unico";
     $result = $conn->query($sql);
     $master_ra = array();

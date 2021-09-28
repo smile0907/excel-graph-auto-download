@@ -279,8 +279,17 @@
               <option value="12"> 12 </option>
             </select>
           </div>
-          <div class="col col-md-3 col-lg-3 col-xs-12">
+          <div class="col col-md-2 col-lg-2 col-xs-12">
             <select class="form-control" id="rain-id-filter" onchange="rainChartFilter()"></select>
+          </div>
+          <div class="col col-md-2 col-lg-2 col-xs-12">
+            <select class="form-control" id="rain-finca-filter" onchange="rainChartFilter()"></select>
+          </div>
+          <div class="col col-md-2 col-lg-2 col-xs-12">
+            <select class="form-control" id="rain-lot-filter" onchange="rainChartFilter()"></select>
+          </div>
+          <div class="col col-md-2 col-lg-2 col-xs-12">
+            <select class="form-control" id="rain-region-filter" onchange="rainChartFilter()"></select>
           </div>
         </div>
         <br />

@@ -4,7 +4,11 @@ let chartMonth;
 let chartID;
 let etoYear = new Date().getFullYear().toString();
 let rainYear = new Date().getFullYear().toString();
-let rainMonth, rainID;
+let rainMonth, rainID, rainRegion, rainFinca, rainLot;
+let rainLotData = [{lot: "All"}];
+let rainFincaData = [{finca: "All"}];
+let rainLotArray = [];
+let rainFincaArray = [];
 
 let quadrantRadiation = "";
 let regionRadiation = "";
@@ -27,6 +31,7 @@ let idData = ["All"];
 let lotData = [{lot: "All"}];
 let lotArray = [];
 let rainIdData = ["All"];
+let rainRegionData = ["All"];
 
 $(document).ready(() => {
     $("#radiation-year-filter").val(chartYear);
@@ -111,17 +116,20 @@ $(document).ready(() => {
         if (!renderRainChartConfirm) {
             $("#rain-year-filter").val(rainYear);
             $("#rain-chart-loading").loading("circle1");
-            $.post("vendor/server/rain.php", { type: "get_allrain", year: rainYear, month: "All", id: "All" }).then((result) => {
+            $.post("vendor/server/rain.php", {
+                type: "get_allrain", year: rainYear, month: "All", id: "All",
+                region: "All", finca: "All", lot: "All",
+            }).then((result) => {
                 let fechas = [];
                 renderRainChartConfirm = true;
                 let rainCharts = [];
                 result = JSON.parse(result);
-                const { rains, rain_masters } = result;
+                const { rains, rain_masters, rain_regions } = result;
                 setTimeout(() => {
                     for (const rain of rains) {
                         let rainAmount = 0;
                         let preRains = [];
-                        const { FINCA_LOTE, CD_PLUVIOMETRO, CANT_LLUVIA, FECHA, MES, ANO } = rain;
+                        const { FINCA_LOTE, CD_PLUVIOMETRO, FECHA, MES, ANO } = rain;
                         for (const rain_master of rain_masters) {
                             const { Codigo_Nuevo, Codigo_Antiguo } = rain_master;
                             if (FINCA_LOTE === Codigo_Nuevo && CD_PLUVIOMETRO === Codigo_Antiguo) {
@@ -141,9 +149,45 @@ $(document).ready(() => {
                                 break;
                             }
                         }
-                        if (!rainIdData.includes(FINCA_LOTE)) rainIdData.push(FINCA_LOTE);
+                    }
+                    for (const product of productData) {
+                        const { id_com_pims, finca, lot } = product;
+                        if (!rainIdData.includes(id_com_pims)) rainIdData.push(id_com_pims);
+                        let ids = [];
+                        if (!rainLotArray.includes(lot)) {
+                            rainLotArray.push(lot);
+                            const RLotData = productData.filter((pro) => {
+                                const Rlot = pro.lot;
+                                return Rlot === lot;
+                            });
+                            for (const ele of RLotData) {
+                                const { id_com_pims } = ele;
+                                ids.push(id_com_pims);
+                            }
+                            rainLotData.push({lot, ID_COMP: ids});
+                        }
+                        if (!rainFincaArray.includes(finca)) {
+                            rainFincaArray.push(finca);
+                            ids = [];
+                            const RFincaData = productData.filter((pro) => {
+                                const RFinca = pro.finca;
+                                return RFinca === finca;
+                            });
+                            for (const ele of RFincaData) {
+                                const { id_com_pims } = ele;
+                                ids.push(id_com_pims);
+                            }
+                            rainFincaData.push({finca, ID_COMP: ids});
+                        }
+                    }
+                    for (const region of rain_regions) {
+                        const { REGION } = region;
+                        if (!rainRegionData.includes(REGION)) rainRegionData.push(REGION);
                     }
                     getRainID(rainIdData);
+                    getRainLot(rainLotData);
+                    getRainFinca(rainFincaData);
+                    getRainRegion(rainRegionData);
                     renderRainChart(rainCharts);
                     $("#rain-chart-loading").loading(false);
                 }, 500);
@@ -487,7 +531,6 @@ const renderEtoChart = (data = []) => {
 }
 
 const renderRainChart = (data = []) => {
-    // $("#zafra-content-eto").html("");
     let labelData = [];
     let dps = [];
     var chart = document.getElementById('chart-rain').getContext('2d');
@@ -500,11 +543,8 @@ const renderRainChart = (data = []) => {
     for (let index = 1; index < data.length; index+=5) {
         const element = data[index];
         let { FECHA, CANT_LLUVIA, ANO, MES } = element;
-        // MES = Number(MES);
-        // !EtoMonth.includes(MES) && EtoMonth.push(MES);
         labelData.push(`${Math.round(index / 5)+1}(${MES})`);
         dps.push(CANT_LLUVIA);
-        // $("#zafra-content-eto").html(Zafra);
     }
 
     var dataSet  = {
@@ -574,13 +614,22 @@ const rainChartFilter = () => {
     const year = $("#rain-year-filter").val();
     const month = $("#rain-month-filter").val();
     const ID = $("#rain-id-filter").val();
+    const region = $("#rain-region-filter").val();
+    const finca = $("#rain-finca-filter").val();
+    const lot = $("#rain-lot-filter").val();
     rainChart.destroy();
     rainYear = year;
     rainMonth = month;
     rainID = ID;
+    rainRegion = region;
+    rainFinca = finca;
+    rainLot = lot;
 
     $("#rain-chart-loading").loading("circle1");
-    $.post("vendor/server/rain.php", { type: "get_allrain", year: rainYear, month: rainMonth, id: rainID }).then((result) => {
+    $.post("vendor/server/rain.php", {
+        type: "get_allrain", year: rainYear, month: rainMonth, id: rainID,
+        region, finca, lot,
+    }).then((result) => {
         let fechas = [];
         let rainCharts = [];
         result = JSON.parse(result);
@@ -674,4 +723,38 @@ const getRainID = (data = []) => {
         `
     }
     $("#rain-id-filter").html(idOptionHtml);
+}
+
+const getRainRegion = (data = []) => {
+    let regionOptionHtml = "";
+    for (const ele of data) {
+        regionOptionHtml += `
+            <option value="${ele}"> ${ele==='All' ? 'All ( ID COMP )' : ele} </option>
+        `
+    }
+    $("#rain-region-filter").html(regionOptionHtml);
+}
+
+const getRainLot = (data = []) => {
+    let lotOptionHtml = "";
+    for (const ele of data) {
+        const { lot, ID_COMP } = ele;
+        const ids = ID_COMP ? ID_COMP.join("|") : "";
+        lotOptionHtml += `
+            <option value="${lot==='All' ? 'All' : ids}"> ${lot==='All' ? 'All ( Lot )' : lot} </option>
+        `
+    }
+    $("#rain-lot-filter").html(lotOptionHtml);
+}
+
+const getRainFinca = (data = []) => {
+    let fincaOptionHtml = "";
+    for (const ele of data) {
+        const { finca, ID_COMP } = ele;
+        const ids = ID_COMP ? ID_COMP.join("|") : "";
+        fincaOptionHtml += `
+            <option value="${finca==='All' ? 'All' : ids}"> ${finca==='All' ? 'All ( finca )' : finca} </option>
+        `
+    }
+    $("#rain-finca-filter").html(fincaOptionHtml);
 }

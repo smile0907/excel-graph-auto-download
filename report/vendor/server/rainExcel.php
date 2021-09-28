@@ -15,9 +15,9 @@
 
     //  Get worksheet dimensions
     $sheet = $objPHPExcel->getSheet(0); 
-    $highestRow = $sheet->getHighestRow(); 
+    $highestRow = $sheet->getHighestRow();
     $highestColumn = $sheet->getHighestColumn();
-    
+
     //  Loop through each row of the worksheet in turn
     for ($row = 2; $row <= $highestRow; $row++) {
         //  Read a row of data into an array
@@ -29,16 +29,25 @@
 
         $USUARIO = $rowData[0];
         $RECIBIDO = $rowData[1];
+        $RECIBIDOType = gettype($RECIBIDO);
+        if ($RECIBIDOType==='string') {
+            $RECIBIDO = date_create_from_format('d/m/Y', $RECIBIDO);
+            $RECIBIDO = $RECIBIDO->format('d/m/Y');
+        } else {
+            $RECIBIDO = date('d/m/Y', PHPExcel_Shared_Date::ExcelToPHP($RECIBIDO));
+        }
         $FECHA = $rowData[2];
         $FechaType = gettype($FECHA);
         if ($FechaType==='string') {
             $FECHA = date_create_from_format('d/m/Y', $FECHA);
-            $FECHA = $Fecha->format('d/m/Y');
+            $FECHA = $FECHA->format('d/m/Y');
         } else {
             $FECHA = date('d/m/Y', PHPExcel_Shared_Date::ExcelToPHP($FECHA));
         }
         $FechaData = date_create_from_format('d/m/Y', $FECHA);
+        $RECIBIDOData = date_create_from_format('d/m/Y', $RECIBIDO);
         $FECHA = $FechaData->format('d/m/Y');
+        $RECIBIDO = $RECIBIDOData->format('d/m/Y');
         $ANO = $rowData[3];
         $MES = $rowData[4];
         $REGION = $rowData[5];

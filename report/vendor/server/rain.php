@@ -89,14 +89,33 @@
         $year = $_POST["year"];
         $month = $_POST["month"];
         $ID = $_POST['id'];
+        $region = $_POST['region'];
+        $finca = $_POST['finca'];
+        $lot = $_POST['lot'];
+        $finca_query = "";
+        $lot_query = "";
+
+        $finca = ($finca!=='All') ? explode('|', $finca) : array();
+        $lot = ($lot!=='All') ? explode('|', $lot) : array();
 
         $sql_rain = "SELECT * FROM rain WHERE ANO = '$year'";
         if ($month && $month!=="All") {
-            $sql_rain = $sql_rain . " AND MES = '$month'";
+            $sql_rain .= " AND MES = '$month'";
         }
         if ($ID && $ID!=="All") {
-            $sql_rain = $sql_rain . " AND FINCA_LOTE = '$ID'";
+            $sql_rain .= " AND FINCA_LOTE = '$ID'";
         }
+        if ($region && $region!=="All") {
+            $sql_rain .= " AND REGION = '$region'";
+        }
+        foreach ($finca as $fin) $finca_query .= ($finca_query==="") ? " AND (FINCA_LOTE='$fin'" : " OR FINCA_LOTE='$fin'";
+        foreach ($lot as $lo) $lot_query .= ($lot_query==="") ? " AND (FINCA_LOTE='$lo'" : " OR FINCA_LOTE='$lo'";
+
+        $finca_query .= ($finca_query!=="") ? ")" : "";
+        $lot_query .= ($lot_query!=="") ? ")" : "";
+        $sql_rain .= $finca_query;
+        $sql_rain .= $lot_query;
+        
         $result_rain = $conn->query($sql_rain);
         $rains = array();
 
@@ -108,9 +127,16 @@
 
         foreach($result_rain_master as $row) array_push($rain_masters, $row);
 
+        $sql_rain_region = "SELECT DISTINCT REGION FROM rain";
+        $result_rain_region = $conn->query($sql_rain_region);
+        $rain_regions = array();
+
+        foreach($result_rain_region as $row) array_push($rain_regions, $row);
+
         echo json_encode(array(
             'rains' => $rains,
-            'rain_masters' => $rain_masters
+            'rain_masters' => $rain_masters,
+            'rain_regions' => $rain_regions,
         ));
     }
 
