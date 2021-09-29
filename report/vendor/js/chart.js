@@ -729,7 +729,7 @@ const getRainRegion = (data = []) => {
     let regionOptionHtml = "";
     for (const ele of data) {
         regionOptionHtml += `
-            <option value="${ele}"> ${ele==='All' ? 'All ( ID COMP )' : ele} </option>
+            <option value="${ele}"> ${ele==='All' ? 'All ( REGION )' : ele} </option>
         `
     }
     $("#rain-region-filter").html(regionOptionHtml);
